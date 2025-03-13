@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db, MovieModel
-from schemas import MovieListResponseSchema, MovieDetailResponseSchema, movies
+from schemas import MovieListResponseSchema, MovieDetailResponseSchema
 
 router = APIRouter()
 
@@ -20,13 +20,10 @@ async def get_movies(
     result = await db.execute(select(MovieModel))
     total_items = len(result.scalars().all())
     total_pages = (total_items + per_page - 1) // per_page
+
     if total_items == 0 or page > total_pages:
         raise HTTPException(status_code=404, detail="No movies found.")
-    if page < 1 or per_page < 10 or per_page > 20:
-        raise HTTPException(
-            status_code=422,
-            detail="ensure this value is greater than or equal to 1"
-        )
+
     prev_page = None\
         if page <= 1\
         else f"/api/v1/theater/movies/?page={page-1}&per_page={per_page}"
